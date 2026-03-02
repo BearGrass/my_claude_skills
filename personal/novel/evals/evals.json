@@ -1,0 +1,149 @@
+{
+  "skill_name": "novel-skills-collection",
+  "evals": [
+    {
+      "id": 1,
+      "name": "workflow-full-guide",
+      "prompt": "我想写一部小说，但不知道从哪里开始，能引导我完成整个创作流程吗？",
+      "expected_skill": "novel-workflow",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-workflow", "expected": true}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ideas-request",
+      "prompt": "给我来点小说灵感，玄幻类型的，关键词是复仇和命运",
+      "expected_skill": "novel-ideas",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-ideas", "expected": true}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "project-create",
+      "prompt": "创建一个小说项目，名字叫《星河守望者》",
+      "expected_skill": "novel-project",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-project", "expected": true}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "draft-chapter",
+      "prompt": "帮我写第5章，主角刚刚发现真相的那场戏",
+      "expected_skill": "novel-draft",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-draft", "expected": true}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "writing-progress",
+      "prompt": "继续写作，上次写到第8章，想看看进度",
+      "expected_skill": "novel-writing",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-writing", "expected": true}
+      ]
+    },
+    {
+      "id": 6,
+      "name": "revision-structure",
+      "prompt": "我写完初稿了，想进行整体修订，看看有没有结构问题",
+      "expected_skill": "novel-revision",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-revision", "expected": true}
+      ]
+    },
+    {
+      "id": 7,
+      "name": "polish-text",
+      "prompt": "文字润色一下，让语言更有画面感",
+      "expected_skill": "novel-polish",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-polish", "expected": true}
+      ]
+    },
+    {
+      "id": 8,
+      "name": "cover-generate",
+      "prompt": "帮我生成一个番茄小说风格的封面，书名叫《仙路独尊》",
+      "expected_skill": "novel-cover",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-cover", "expected": true}
+      ]
+    },
+    {
+      "id": 9,
+      "name": "standards-query",
+      "prompt": "小说创作有哪些规范和标准？比如文件怎么放、文字怎么校对",
+      "expected_skill": "novel-standards",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-standards", "expected": true}
+      ]
+    },
+    {
+      "id": 10,
+      "name": "worldbuilding-request",
+      "prompt": "帮我构建一个玄幻世界观，有修炼体系的那种",
+      "expected_skill": "novel-worldbuilding",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-worldbuilding", "expected": true}
+      ]
+    },
+    {
+      "id": 11,
+      "name": "character-design",
+      "prompt": "塑造一个女主角，她是现代都市白领，性格外冷内热",
+      "expected_skill": "novel-characters",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-characters", "expected": true}
+      ]
+    },
+    {
+      "id": 12,
+      "name": "outline-create",
+      "prompt": "帮我写一个故事大纲，三幕式结构，大约20万字",
+      "expected_skill": "novel-outline",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-outline", "expected": true}
+      ]
+    },
+    {
+      "id": 13,
+      "name": "non-novel-poem",
+      "prompt": "我想写一首诗，表达对春天的热爱",
+      "expected_skill": "none",
+      "assertions": [
+        {"type": "no_skill_triggered", "expected": true}
+      ]
+    },
+    {
+      "id": 14,
+      "name": "non-novel-code",
+      "prompt": "帮我写一段代码，实现快速排序算法",
+      "expected_skill": "none",
+      "assertions": [
+        {"type": "no_skill_triggered", "expected": true}
+      ]
+    },
+    {
+      "id": 15,
+      "name": "non-novel-essay",
+      "prompt": "写一篇关于人工智能的论文",
+      "expected_skill": "none",
+      "assertions": [
+        {"type": "no_skill_triggered", "expected": true}
+      ]
+    },
+    {
+      "id": 16,
+      "name": "edge-chapter-issue",
+      "prompt": "我的小说第3章感觉节奏有点慢，怎么办",
+      "expected_skill": "novel-revision",
+      "assertions": [
+        {"type": "skill_triggered", "skill": "novel-revision", "expected": true}
+      ]
+    }
+  ]
+}

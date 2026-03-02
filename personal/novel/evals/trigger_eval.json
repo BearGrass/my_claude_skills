@@ -1,0 +1,104 @@
+[
+  {
+    "query": "我想写一部小说，但不知道从哪里开始，能引导我完成整个创作流程吗？",
+    "should_trigger": true,
+    "target_skill": "novel-workflow"
+  },
+  {
+    "query": "给我来点小说灵感，玄幻类型的，关键词是复仇和命运",
+    "should_trigger": true,
+    "target_skill": "novel-ideas"
+  },
+  {
+    "query": "创建一个小说项目，名字叫《星河守望者》，科幻类型",
+    "should_trigger": true,
+    "target_skill": "novel-project"
+  },
+  {
+    "query": "帮我写第5章，主角刚刚发现真相的那场戏",
+    "should_trigger": true,
+    "target_skill": "novel-draft"
+  },
+  {
+    "query": "我写完初稿了，想进行整体修订，看看有没有结构问题",
+    "should_trigger": true,
+    "target_skill": "novel-revision"
+  },
+  {
+    "query": "文字润色一下，让语言更有画面感",
+    "should_trigger": true,
+    "target_skill": "novel-polish"
+  },
+  {
+    "query": "帮我生成一个番茄小说风格的封面，书名叫《仙路独尊》",
+    "should_trigger": true,
+    "target_skill": "novel-cover"
+  },
+  {
+    "query": "小说创作有哪些规范和标准？比如文件怎么放、文字怎么校对",
+    "should_trigger": true,
+    "target_skill": "novel-standards"
+  },
+  {
+    "query": "帮我构建一个玄幻世界观，有修炼体系的那种",
+    "should_trigger": true,
+    "target_skill": "novel-worldbuilding"
+  },
+  {
+    "query": "塑造一个女主角，她是现代都市白领，性格外冷内热",
+    "should_trigger": true,
+    "target_skill": "novel-characters"
+  },
+  {
+    "query": "帮我写一个故事大纲，三幕式结构，大约20万字",
+    "should_trigger": true,
+    "target_skill": "novel-outline"
+  },
+  {
+    "query": "继续写作，上次写到第8章",
+    "should_trigger": true,
+    "target_skill": "novel-writing"
+  },
+  {
+    "query": "我想写一首诗，表达对春天的热爱",
+    "should_trigger": false,
+    "reason": "不是小说创作"
+  },
+  {
+    "query": "帮我写一段代码，实现快速排序算法",
+    "should_trigger": false,
+    "reason": "是编程任务，不是小说创作"
+  },
+  {
+    "query": "写一篇关于人工智能的论文",
+    "should_trigger": false,
+    "reason": "是学术论文，不是小说创作"
+  },
+  {
+    "query": "帮我翻译这段英文到中文",
+    "should_trigger": false,
+    "reason": "是翻译任务"
+  },
+  {
+    "query": "写一个短视频脚本，大概是30秒的那种",
+    "should_trigger": false,
+    "reason": "是短视频脚本，虽然也是创作但不是小说"
+  },
+  {
+    "query": "帮我写个工作周报",
+    "should_trigger": false,
+    "reason": "是工作文档"
+  },
+  {
+    "query": "我的小说第3章感觉节奏有点慢，怎么办",
+    "should_trigger": true,
+    "target_skill": "novel-revision",
+    "reason": "涉及小说章节修订"
+  },
+  {
+    "query": "想个有趣的故事开头，第一句话就要抓住读者",
+    "should_trigger": true,
+    "target_skill": "novel-draft",
+    "reason": "涉及小说写作技巧"
+  }
+]

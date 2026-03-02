@@ -1,0 +1,66 @@
+[
+  {
+    "query": "我想写一部小说，但不知道从哪里开始，能引导我完成整个创作流程吗？",
+    "should_trigger": true
+  },
+  {
+    "query": "引导我写小说，从头到尾完整的那种",
+    "should_trigger": true
+  },
+  {
+    "query": "我想创作一部小说，需要一步步指导",
+    "should_trigger": true
+  },
+  {
+    "query": "小说创作完整流程是什么？怎么从头开始写？",
+    "should_trigger": true
+  },
+  {
+    "query": "我有个故事想法，想把它发展成完整的小说",
+    "should_trigger": true
+  },
+  {
+    "query": "怎么系统地写一部小说？需要哪些步骤？",
+    "should_trigger": true
+  },
+  {
+    "query": "帮我开始写小说的完整过程",
+    "should_trigger": true
+  },
+  {
+    "query": "我想写个故事，但不知道怎么开始",
+    "should_trigger": true
+  },
+  {
+    "query": "给我来点小说灵感",
+    "should_trigger": false
+  },
+  {
+    "query": "创建一个小说项目",
+    "should_trigger": false
+  },
+  {
+    "query": "帮我写第3章",
+    "should_trigger": false
+  },
+  {
+    "query": "生成一个小说封面",
+    "should_trigger": false
+  },
+  {
+    "query": "帮我写一首诗",
+    "should_trigger": false
+  },
+  {
+    "query": "写一段代码实现快速排序",
+    "should_trigger": false
+  },
+  {
+    "query": "帮我写个工作周报",
+    "should_trigger": false
+  },
+  {
+    "query": "翻译这段英文到中文",
+    "should_trigger": false
+  }
+]
