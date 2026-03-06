@@ -1,0 +1,20 @@
+{
+  "run_id": "eval-3-without_skill",
+  "grading_results": [
+    {
+      "text": "识别为样本操作",
+      "passed": false,
+      "evidence": "没有样本库概念，仅作为文本分析任务"
+    },
+    {
+      "text": "技法分析",
+      "passed": true,
+      "evidence": "提供了动作与情绪反差、'拍'字的戏剧性等分析"
+    },
+    {
+      "text": "标签识别",
+      "passed": false,
+      "evidence": "没有使用标签体系，仅做了文字分析"
+    }
+  ]
+}

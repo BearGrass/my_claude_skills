@@ -1,0 +1,77 @@
+{
+  "skill_name": "novel-forge",
+  "iteration": 1,
+  "timestamp": "2026-03-06T01:40:00Z",
+  "summary": {
+    "with_skill": {
+      "total_tests": 3,
+      "passed_assertions": 9,
+      "total_assertions": 9,
+      "pass_rate": 1.0,
+      "avg_duration_seconds": 108.6,
+      "total_duration_seconds": 325.9
+    },
+    "without_skill": {
+      "total_tests": 3,
+      "passed_assertions": 6,
+      "total_assertions": 9,
+      "pass_rate": 0.67,
+      "avg_duration_seconds": 46.3,
+      "total_duration_seconds": 138.9
+    },
+    "delta": {
+      "pass_rate_improvement": 0.33,
+      "duration_overhead_seconds": 62.3
+    }
+  },
+  "details": [
+    {
+      "eval_id": 1,
+      "eval_name": "intent-routing-create",
+      "with_skill": {
+        "passed": 3,
+        "total": 3,
+        "duration_seconds": 88.5
+      },
+      "without_skill": {
+        "passed": 2,
+        "total": 3,
+        "duration_seconds": 48.3
+      }
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "intent-routing-revise",
+      "with_skill": {
+        "passed": 3,
+        "total": 3,
+        "duration_seconds": 92.3
+      },
+      "without_skill": {
+        "passed": 2,
+        "total": 3,
+        "duration_seconds": 51.0
+      }
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "sample-operations",
+      "with_skill": {
+        "passed": 3,
+        "total": 3,
+        "duration_seconds": 145.1
+      },
+      "without_skill": {
+        "passed": 1,
+        "total": 3,
+        "duration_seconds": 39.6
+      }
+    }
+  ],
+  "analyst_observations": [
+    "技能显著提升了意图识别准确性，所有工作流ID都能正确识别",
+    "技能提供了完整的工作流框架（CREATE_FULL、REVISE_SCENE、SAMPLE_ADD），而无技能基线只能做通用处理",
+    "样本库操作差距最大：有技能版本能识别标签体系并更新索引，无技能版本没有样本库概念",
+    "有技能版本耗时更长（平均108.6秒 vs 46.3秒），但提供了更结构化、可执行的输出"
+  ]
+}

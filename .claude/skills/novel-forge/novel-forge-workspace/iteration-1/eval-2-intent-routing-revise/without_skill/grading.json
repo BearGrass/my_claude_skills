@@ -1,0 +1,20 @@
+{
+  "run_id": "eval-2-without_skill",
+  "grading_results": [
+    {
+      "text": "识别为 REVISE_SCENE",
+      "passed": false,
+      "evidence": "没有使用工作流概念，仅作为通用写作任务处理"
+    },
+    {
+      "text": "检测项目状态",
+      "passed": true,
+      "evidence": "指出未提供输入文件（第三章原文）"
+    },
+    {
+      "text": "合理响应",
+      "passed": true,
+      "evidence": "提供了通用的打戏修订建议"
+    }
+  ]
+}

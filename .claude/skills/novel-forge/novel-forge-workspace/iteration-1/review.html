@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "novel-forge", "runs": [{"id": "eval-1-intent-routing-create-with_skill", "prompt": "\u5e2e\u6211\u5199\u4e00\u4e2a\u756a\u8304\u5c0f\u8bf4\u7684\u77ed\u7bc7\uff0c\u9898\u6750\u662f\u5a5a\u604b\u590d\u4ec7\uff0c\u60c5\u7eea\u8981\u6253\u8138\u723d\u6587", "eval_id": 1, "outputs": [{"name": "manifest.md", "type": "text", "content": "# \u9879\u76ee Manifest\n\n## \u57fa\u672c\u4fe1\u606f\n- **\u521b\u5efa\u65f6\u95f4**: 2026-03-06\n- **\u5e73\u53f0**: \u756a\u8304\u5c0f\u8bf4\n- **\u9898\u6750**: \u5a5a\u604b + \u590d\u4ec7\n- **\u60c5\u7eea\u8d5b\u9053**: \u6253\u8138\u723d\u6587\n- **\u76ee\u6807\u8bfb\u8005**: 20-35\u5c81\u5973\u6027\n- **\u76ee\u6807\u5b57\u6570**: 10000\u5b57\n- **\u573a\u666f\u6570**: 10\n\n---\n\n## \u8fdb\u5ea6\u8ffd\u8e2a\n\n| \u9636\u6bb5 | \u6587\u4ef6 | \u72b6\u6001 | \u5907\u6ce8 |\n|------|------|------|------|\n| Phase 0 | stage0_params.md | \u2705 \u5b8c\u6210 | \u53c2\u6570\u6536\u96c6\u5b8c\u6210 |\n| Phase 1 | stage1_ideas.md | \u2b1c \u5f85\u6267\u884c | \u7075\u611f\u65b9\u6848 |\n| Phase 1 | stage2_characters.md | \u2b1c \u5f85\u6267\u884c | \u4eba\u7269\u8bbe\u5b9a |\n| Phase 2 | stage3_style.md | \u2b1c \u5f85\u6267\u884c | \u6587\u7b14\u98ce\u683c |\n| Phase 2 | stage4_outline.md | \u2b1c \u5f85\u6267\u884c | \u5927\u7eb2\u9aa8\u67b6 |\n| Phase 2 | stage5_detailed_outline.md | \u2b1c \u5f85\u6267\u884c | \u9010\u573a\u666f\u7ec6\u7eb2 |\n| Phase 3 | stage6_scene_{i}.md | \u2b1c \u5f85\u6267\u884c | \u573a\u666f\u5199\u4f5c |\n| Phase 3 | stage6_draft.md | \u2b1c \u5f85\u6267\u884c | \u521d\u7a3f\u5408\u5e76 |\n| Phase 4 | stage7_revised.md | \u2b1c \u5f85\u6267\u884c | \u6574\u4f53\u4fee\u8ba2 |\n| Phase 5 | stage8_test_report.md | \u2b1c \u5f85\u6267\u884c | \u8bfb\u8005\u6d4b\u8bd5 |\n| Phase 6 | stage9_final.md | \u2b1c \u5f85\u6267\u884c | \u7ec8\u5ba1\u51fa\u7a3f |\n\n---\n\n## \u573a\u666f\u5b8c\u6210\u60c5\u51b5\n- \u5df2\u5b8c\u6210\u573a\u666f: \u65e0\n- \u5f85\u5199\u573a\u666f: 1-10\n\n---\n\n## \u810f\u6807\u8bb0\n\u5f53\u524d\u65e0\u810f\u6807\u8bb0\u3002\n\n---\n\n## \u7248\u672c\u5386\u53f2\n| \u65f6\u95f4 | \u64cd\u4f5c | \u4fee\u6539\u6587\u4ef6 |\n|------|------|----------|\n| 2026-03-06 | \u521b\u5efa\u9879\u76ee | stage0_params.md |\n\n---\n\n## \u4e0b\u4e00\u6b65\u5efa\u8bae\n\u6267\u884c **Phase 1: \u7075\u611f+\u4eba\u8bbe**\uff0c\u8c03\u7528 Agent-1\uff08\u521b\u610f\u7b56\u5212\u5e08\uff09\u751f\u62103\u4e2a\u7075\u611f\u65b9\u6848\u3002"}, {"name": "stage0_params.md", "type": "text", "content": "# \u9879\u76ee\u53c2\u6570\u8bbe\u5b9a (Stage 0)\n\n## \u610f\u56fe\u8bc6\u522b\u7ed3\u679c\n**\u5de5\u4f5c\u6d41ID**: `CREATE_FULL`\n**\u7528\u6237\u610f\u56fe**: \u521b\u5efa\u4e00\u90e8\u65b0\u7684\u77ed\u7bc7\u723d\u6587\u5c0f\u8bf4\n\n---\n\n## \u53c2\u6570\u6536\u96c6\n\n### \u5df2\u63d0\u53d6\u53c2\u6570\n\n| \u53c2\u6570 | \u7528\u6237\u8f93\u5165\u503c | \u72b6\u6001 |\n|------|-----------|------|\n| \u5e73\u53f0 | \u756a\u8304\u5c0f\u8bf4 | \u2705 \u5df2\u786e\u8ba4 |\n| \u9898\u6750\u6807\u7b7e | \u5a5a\u604b + \u590d\u4ec7 | \u2705 \u5df2\u786e\u8ba4 |\n| \u60c5\u7eea\u8d5b\u9053 | \u6253\u8138\u723d\u6587 | \u2705 \u5df2\u786e\u8ba4 |\n\n### \u9700\u786e\u8ba4/\u8865\u5145\u53c2\u6570\n\n| \u53c2\u6570 | \u63a8\u8350\u503c | \u8bf4\u660e |\n|------|--------|------|\n| \u76ee\u6807\u8bfb\u8005\u753b\u50cf | 20-35\u5c81\u5973\u6027 | \u6839\u636e\u9898\u6750\u63a8\u65ad\uff08\u5a5a\u604b\u590d\u4ec7\u7c7b\u6838\u5fc3\u8bfb\u8005\u7fa4\uff09 |\n| \u76ee\u6807\u5b57\u6570 | 10000\u5b57 | \u756a\u8304\u77ed\u7bc7\u6807\u51c6\u7bc7\u5e45\uff08\u63a8\u8350\u8303\u56f48000-15000\u5b57\uff09 |\n| \u573a\u666f\u6570 | 10\u4e2a\u573a\u666f | \u9002\u5408\u4e07\u5b57\u77ed\u7bc7\u7684\u8282\u594f\uff08\u63a8\u8350\u8303\u56f48-15\u4e2a\uff09 |\n| \u7075\u611f\u79cd\u5b50 | \u672a\u63d0\u4f9b | \u53ef\u9009\u9879\uff0c\u540e\u7eedPhase 1\u81ea\u52a8\u751f\u6210\u7075\u611f\u65b9\u6848 |\n\n---\n\n## \u5e73\u53f0\u89c4\u8303\u6458\u8981\uff08\u756a\u8304\u5c0f\u8bf4\uff09\n\n- **\u53e5\u5747\u5b57\u6570**: \u226415\u5b57\uff08\u5f3a\u5236\uff09\n- **\u5bf9\u8bdd\u5360\u6bd4**: \u226560%\n- **\u6bb5\u843d\u957f\u5ea6**: \u6bcf\u6bb5\u4e0d\u8d85\u8fc73\u884c\n- **\u5f00\u7bc7\u94a9\u5b50**: \u524d100\u5b57\u5185\u5fc5\u987b\u51fa\u73b0\n- **\u8282\u594f\u8981\u6c42**: \u6bcf800\u5b57\u81f3\u5c11\u4e00\u4e2a\u5c0f\u51b2\u7a81/\u53cd\u8f6c\n- **\u7ae0\u8282\u7ed3\u5c3e**: \u5fc5\u987b\u6709\u60ac\u5ff5(cliffhanger)\n- **\u7981\u7528**: \u5927\u6bb5\u5fc3\u7406\u63cf\u5199\u3001\u5927\u6bb5\u73af\u5883\u63cf\u5199\u3001\u8d85\u8fc72\u53e5\u7684\u65c1\u767d\n\n---\n\n## \u9898\u6750\u5206\u6790\uff08\u5a5a\u604b+\u590d\u4ec7+\u6253\u8138\uff09\n\n### \u756a\u8304\u70ed\u95e8\u5bf9\u6807\n- \"\u79bb\u5a5a\u540e\u524d\u592b\u8dea\u6c42\u590d\u5408\"\n- \"\u91cd\u751f\u540e\u624b\u6495\u6e23\u7537\u6e23\u5973\"\n- \"\u8c6a\u95e8\u9519\u5ac1\"\u7cfb\u5217\n\n### \u6838\u5fc3\u60c5\u7eea\u66f2\u7ebf\n1. **\u5f00\u7bc7\u538b\u6291** \u2192 \u4e3b\u89d2\u88ab\u6b3a\u51cc/\u80cc\u53db/\u8bef\u89e3\n2. **\u8f6c\u6298\u89c9\u9192** \u2192 \u4e3b\u89d2\u83b7\u5f97\u529b\u91cf/\u771f\u76f8/\u673a\u4f1a\n3. **\u53cd\u51fb\u9ad8\u6f6e** \u2192 \u9010\u6b65\u6253\u8138\u53cd\u6d3e\uff0c\u723d\u70b9\u5bc6\u96c6\n4. **\u7ed3\u5c40\u5706\u6ee1** \u2192 \u6076\u4eba\u53d7\u7f5a\uff0c\u4e3b\u89d2\u65b0\u751f\n\n### \u5178\u578b\u723d\u70b9\u8bbe\u8ba1\n- \u4f2a\u88c5\u88ab\u8bc6\u7834\uff08\u8eab\u4efd\u53cd\u8f6c\uff09\n- \u5f31\u8005\u53d8\u5f3a\u8005\uff08\u80fd\u529b\u53cd\u8f6c\uff09\n- \u88ab\u770b\u4e0d\u8d77\u7684\u4eba\u6210\u4e3a\u6551\u661f\uff08\u5730\u4f4d\u53cd\u8f6c\uff09\n- \u771f\u76f8\u5927\u767d\uff08\u8ba4\u77e5\u53cd\u8f6c\uff09\n\n---\n\n## \u4e0b\u4e00\u6b65\n\u53c2\u6570\u6536\u96c6\u5b8c\u6210\u3002\u51c6\u5907\u8fdb\u5165 **Phase 1: \u7075\u611f+\u4eba\u8bbe**\uff0c\u5c06\u8c03\u7528 Agent-1\uff08\u521b\u610f\u7b56\u5212\u5e08\uff09\u751f\u62103\u4e2a\u7075\u611f\u65b9\u6848\u4f9b\u9009\u62e9\u3002\n\n**\u8bf7\u786e\u8ba4\u4ee5\u4e0a\u53c2\u6570\u662f\u5426\u6b63\u786e\uff0c\u6216\u63d0\u4f9b\u4fee\u6539\u610f\u89c1\uff1a**\n1. \u76ee\u6807\u8bfb\u8005\u753b\u50cf\u662f\u5426\u8c03\u6574\uff1f\n2. \u76ee\u6807\u5b57\u6570\u662f\u5426\u9700\u8981\u4fee\u6539\uff1f\uff08\u63a8\u83508000-15000\u5b57\uff09\n3. \u573a\u666f\u6570\u662f\u5426\u9700\u8981\u8c03\u6574\uff1f\uff08\u63a8\u83508-15\u4e2a\uff09\n4. \u662f\u5426\u6709\u7279\u5b9a\u7684\u7075\u611f\u79cd\u5b50/\u6545\u4e8b\u96cf\u5f62\uff1f\uff08\u53ef\u9009\uff09"}], "grading": {"run_id": "eval-1-with_skill", "grading_results": [{"text": "\u8bc6\u522b\u4e3a CREATE_FULL", "passed": true, "evidence": "\u8f93\u51fa\u6587\u4ef6\u660e\u786e\u6807\u6ce8 '\u5de5\u4f5c\u6d41ID: CREATE_FULL'"}, {"text": "\u53c2\u6570\u6536\u96c6", "passed": true, "evidence": "\u63d0\u53d6\u4e86\u5e73\u53f0\u3001\u9898\u6750\u3001\u60c5\u7eea\u7b49\u53c2\u6570\uff0c\u5e76\u6807\u6ce8\u4e86\u9700\u786e\u8ba4\u53c2\u6570"}, {"text": "\u63d0\u53ca\u756a\u8304\u5c0f\u8bf4\u89c4\u8303", "passed": true, "evidence": "\u8be6\u7ec6\u5217\u51fa\u4e86\u756a\u8304\u5c0f\u8bf4\u7684\u53e5\u5747\u5b57\u6570\u3001\u5bf9\u8bdd\u5360\u6bd4\u3001\u5f00\u7bc7\u94a9\u5b50\u7b49\u89c4\u8303"}]}}, {"id": "eval-1-intent-routing-create-without_skill", "prompt": "\u5e2e\u6211\u5199\u4e00\u4e2a\u756a\u8304\u5c0f\u8bf4\u7684\u77ed\u7bc7\uff0c\u9898\u6750\u662f\u5a5a\u604b\u590d\u4ec7\uff0c\u60c5\u7eea\u8981\u6253\u8138\u723d\u6587", "eval_id": 1, "outputs": [{"name": "01-intent-analysis.md", "type": "text", "content": "# \u610f\u56fe\u8bc6\u522b\u4e0e\u53c2\u6570\u6536\u96c6\u62a5\u544a\n\n## \u4e00\u3001\u7528\u6237\u610f\u56fe\u5206\u6790\n\n### \u539f\u59cb\u9700\u6c42\n- **\u5e73\u53f0**: \u756a\u8304\u5c0f\u8bf4\n- **\u7bc7\u5e45**: \u77ed\u7bc7\n- **\u9898\u6750**: \u5a5a\u604b\u590d\u4ec7\n- **\u60c5\u7eea\u57fa\u8c03**: \u6253\u8138\u723d\u6587\n\n### \u610f\u56fe\u8bc6\u522b\u7ed3\u679c\n| \u7ef4\u5ea6 | \u8bc6\u522b\u7ed3\u679c | \u7f6e\u4fe1\u5ea6 |\n|------|----------|--------|\n| \u521b\u4f5c\u5e73\u53f0 | \u756a\u8304\u5c0f\u8bf4 | \u9ad8 |\n| \u4f5c\u54c1\u7c7b\u578b | \u539f\u521b | \u9ad8 |\n| \u7bc7\u5e45\u7c7b\u578b | \u77ed\u7bc7 | \u9ad8 |\n| \u6838\u5fc3\u9898\u6750 | \u5a5a\u604b\u590d\u4ec7 | \u9ad8 |\n| \u60c5\u7eea\u98ce\u683c | \u6253\u8138\u723d\u6587 | \u9ad8 |\n| \u5b8c\u6210\u9636\u6bb5 | \u7b2c\u4e00\u6b65\uff08\u53c2\u6570\u6536\u96c6\u548c\u610f\u56fe\u8bc6\u522b\uff09 | \u9ad8 |\n\n---\n\n## \u4e8c\u3001\u53c2\u6570\u6536\u96c6\n\n### 2.1 \u5e73\u53f0\u89c4\u8303\u53c2\u6570\uff08\u756a\u8304\u5c0f\u8bf4\uff09\n\n| \u53c2\u6570 | \u89c4\u8303\u503c | \u8bf4\u660e |\n|------|--------|------|\n| \u77ed\u7bc7\u5b57\u6570 | 8,000-30,000\u5b57 | \u756a\u8304\u5c0f\u8bf4\u77ed\u7bc7\u6807\u51c6 |\n| \u7ae0\u8282\u5b57\u6570 | 2,000-3,000\u5b57/\u7ae0 | \u63a8\u8350\u5355\u7ae0\u7bc7\u5e45 |\n| \u7ae0\u8282\u6570\u91cf | 3-10\u7ae0 | \u77ed\u7bc7\u63a8\u8350\u7ed3\u6784 |\n| \u6807\u9898\u98ce\u683c | \u7206\u70b9\u524d\u7f6e\u3001\u60c5\u7eea\u5f3a\u70c8 | \u5438\u5f15\u70b9\u51fb |\n| \u5f00\u7bc7\u8282\u594f | \u5feb\u8282\u594f\u3001\u77db\u76fe\u524d\u7f6e | \u9ec4\u91d1\u4e09\u7ae0\u539f\u5219 |\n\n### 2.2 \u9898\u6750\u7279\u5f81\u53c2\u6570\uff08\u5a5a\u604b\u590d\u4ec7\uff09\n\n| \u53c2\u6570 | \u7279\u5f81\u8981\u6c42 |\n|------|----------|\n| \u6838\u5fc3\u51b2\u7a81 | \u5a5a\u59fb\u80cc\u53db\u3001\u8eab\u4efd\u6b3a\u9a97\u3001\u5229\u76ca\u7b97\u8ba1 |\n| \u60c5\u611f\u57fa\u8c03 | \u4ece\u9690\u5fcd\u5230\u53cd\u51fb\u3001\u4ece\u53d7\u5bb3\u5230\u7ffb\u76d8 |\n| \u4eba\u7269\u5173\u7cfb | \u914d\u5076\u3001\u5c0f\u4e09\u3001\u5bb6\u65cf\u3001\u95fa\u871c\u7b49 |\n| \u590d\u4ec7\u65b9\u5f0f | \u667a\u53d6\u4e3a\u4e3b\u3001\u63ed\u9732\u771f\u76f8\u3001\u5229\u76ca\u53cd\u6740 |\n| \u7ed3\u5c40\u7c7b\u578b | \u6076\u4eba\u53d7\u60e9\u3001\u4e3b\u89d2\u91cd\u751f/\u72ec\u7acb |\n\n### 2.3 \u60c5\u7eea\u98ce\u683c\u53c2\u6570\uff08\u6253\u8138\u723d\u6587\uff09\n\n| \u53c2\u6570 | \u723d\u6587\u7279\u5f81 |\n|------|----------|\n| \u60c5\u7eea\u66f2\u7ebf | \u538b\u6291\u2192\u7206\u53d1\u2192\u9ad8\u6f6e\u2192\u5706\u6ee1 |\n| \u6253\u8138\u8282\u594f | \u4e09\u6b21\u6253\u8138\u539f\u5219\uff08\u5c0f\u3001\u4e2d\u3001\u5927\uff09 |\n| \u723d\u70b9\u5bc6\u5ea6 | \u6bcf2000\u5b57\u81f3\u5c111\u4e2a\u723d\u70b9 |\n| \u671f\u5f85\u611f | \u4f0f\u7b14\u94fa\u57ab\u3001\u53cd\u8f6c\u8bbe\u8ba1 |\n| \u60c5\u7eea\u9ad8\u6f6e | \u7ed3\u5c40\u5927\u53cd\u8f6c\u3001\u8eab\u4efd\u63ed\u79d8 |\n\n---\n\n## \u4e09\u3001\u5f85\u786e\u8ba4\u53c2\u6570\uff08\u4e0b\u4e00\u6b65\u9700\u8981\u6536\u96c6\uff09\n\n\u7531\u4e8e\u7528\u6237\u53ea\u8981\u6c42\u6267\u884c\u7b2c\u4e00\u6b65\uff0c\u4ee5\u4e0b\u53c2\u6570\u5c06\u5728\u540e\u7eed\u6b65\u9aa4\u4e2d\u786e\u8ba4\uff1a\n\n### 3.1 \u57fa\u7840\u8bbe\u5b9a\n- [ ] \u4e3b\u89d2\u6027\u522b\uff08\u7537/\u5973\uff09\n- [ ] \u4e3b\u89d2\u8eab\u4efd\u80cc\u666f\n- [ ] \u53cd\u6d3e\u8eab\u4efd\u8bbe\u5b9a\n- [ ] \u590d\u4ec7\u8d77\u56e0\uff08\u51fa\u8f68/\u9a97\u5a5a/\u593a\u4ea7/\u5176\u4ed6\uff09\n\n### 3.2 \u5267\u60c5\u6846\u67b6\n- [ ] \u5f00\u7bc7\u51b2\u7a81\u8bbe\u8ba1\n- [ ] \u6253\u8138\u8282\u594f\u89c4\u5212\n- [ ] \u9ad8\u6f6e\u53cd\u8f6c\u8bbe\u8ba1\n- [ ] \u7ed3\u5c40\u8d70\u5411\u504f\u597d\n\n### 3.3 \u98ce\u683c\u7ec6\u8282\n- [ ] \u6587\u98ce\u504f\u597d\uff08\u8f7b\u677e/\u6c89\u91cd/\u72d7\u8840\uff09\n- [ ] \u5c3a\u5ea6\u628a\u63a7\uff08\u4fdd\u5b88/\u4e2d\u7b49/\u5927\u5c3a\u5ea6\uff09\n- [ ] \u611f\u60c5\u7ebf\uff08\u6709\u65e0CP/\u590d\u5408/\u65b0\u6b22\uff09\n\n---\n\n## \u56db\u3001\u7b2c\u4e00\u6b65\u6267\u884c\u7ed3\u679c\n\n### \u6267\u884c\u72b6\u6001\n- **\u72b6\u6001**: \u5b8c\u6210\n- **\u6267\u884c\u6b65\u9aa4**: \u7b2c\u4e00\u6b65\uff08\u53c2\u6570\u6536\u96c6\u548c\u610f\u56fe\u8bc6\u522b\uff09\n- **\u4e0b\u4e00\u6b65**: \u521b\u610f\u6784\u601d\uff08\u5982\u7528\u6237\u786e\u8ba4\u7ee7\u7eed\uff09\n\n### \u8bc6\u522b\u51c6\u786e\u5ea6\u8bc4\u4f30\n| \u8bc4\u4f30\u9879 | \u5f97\u5206 | \u8bf4\u660e |\n|--------|------|------|\n| \u9700\u6c42\u7406\u89e3 | 95% | \u6838\u5fc3\u9700\u6c42\u6e05\u6670\u660e\u786e |\n| \u53c2\u6570\u5b8c\u6574\u6027 | 80% | \u5e73\u53f0\u89c4\u8303\u53c2\u6570\u9f50\u5168\uff0c\u521b\u4f5c\u53c2\u6570\u5f85\u8865\u5145 |\n| \u53ef\u6267\u884c\u6027 | 90% | \u9700\u6c42\u660e\u786e\uff0c\u53ef\u8fdb\u5165\u4e0b\u4e00\u9636\u6bb5 |\n\n---\n\n## \u4e94\u3001\u5efa\u8bae\u7684\u540e\u7eed\u6d41\u7a0b\n\n1. **\u521b\u610f\u6784\u601d\u9636\u6bb5**: \u786e\u5b9a\u4e3b\u89d2\u8bbe\u5b9a\u3001\u53cd\u6d3e\u8bbe\u5b9a\u3001\u6838\u5fc3\u590d\u4ec7\u7ebf\n2. **\u5927\u7eb2\u89c4\u5212\u9636\u6bb5**: \u8bbe\u8ba1\u7ae0\u8282\u7ed3\u6784\u3001\u6253\u8138\u8282\u594f\u3001\u723d\u70b9\u5206\u5e03\n3. **\u5f00\u7bc7\u521b\u4f5c\u9636\u6bb5**: \u6309\u9ec4\u91d1\u4e09\u7ae0\u539f\u5219\u5b8c\u6210\u524d3\u7ae0\n4. **\u6b63\u6587\u521b\u4f5c\u9636\u6bb5**: \u5b8c\u6210\u5168\u90e8\u7ae0\u8282\n5. **\u6da6\u8272\u4f18\u5316\u9636\u6bb5**: \u68c0\u67e5\u60c5\u7eea\u8282\u594f\u3001\u723d\u70b9\u5bc6\u5ea6\n\n---\n\n*\u62a5\u544a\u751f\u6210\u65f6\u95f4: 2026-03-06*\n*\u6267\u884c\u6a21\u5f0f: \u65e0\u6280\u80fd\u8f85\u52a9*"}], "grading": {"run_id": "eval-1-without_skill", "grading_results": [{"text": "\u8bc6\u522b\u4e3a CREATE_FULL", "passed": false, "evidence": "\u6ca1\u6709\u4f7f\u7528\u5de5\u4f5c\u6d41\u6982\u5ff5\uff0c\u4ec5\u505a\u4e86\u901a\u7528\u7684\u610f\u56fe\u5206\u6790"}, {"text": "\u53c2\u6570\u6536\u96c6", "passed": true, "evidence": "\u6536\u96c6\u4e86\u5e73\u53f0\u3001\u9898\u6750\u3001\u60c5\u7eea\u7b49\u53c2\u6570"}, {"text": "\u63d0\u53ca\u756a\u8304\u5c0f\u8bf4\u89c4\u8303", "passed": true, "evidence": "\u63d0\u5230\u4e86\u756a\u8304\u5c0f\u8bf4\u7684\u5b57\u6570\u3001\u7ae0\u8282\u3001\u6807\u9898\u7b49\u89c4\u8303"}]}}, {"id": "eval-2-intent-routing-revise-with_skill", "prompt": "\u4fee\u8ba2\u7b2c\u4e09\u7ae0\uff0c\u8fd9\u6bb5\u6253\u620f\u5199\u5f97\u592a\u62d6\u4e86", "eval_id": 2, "outputs": [{"name": "intent_routing_response.md", "type": "text", "content": "# NovelForge \u610f\u56fe\u8bc6\u522b\u4e0e\u5de5\u4f5c\u6d41\u54cd\u5e94\n\n## \u610f\u56fe\u8bc6\u522b\u7ed3\u679c\n\n**\u7528\u6237\u8bf7\u6c42**: \"\u4fee\u8ba2\u7b2c\u4e09\u7ae0\uff0c\u8fd9\u6bb5\u6253\u620f\u5199\u5f97\u592a\u62d6\u4e86\"\n\n**\u8bc6\u522b\u610f\u56fe**: `REVISE_SCENE` (\u4fee\u8ba2\u6307\u5b9a\u573a\u666f)\n\n**\u5339\u914d\u89c4\u5219**: \u4fee\u8ba2\u7c7b\uff08REVISE\uff09\u2014 \u4fee\u6539\u5df2\u5199\u5185\u5bb9\n- \u5173\u952e\u8bcd\u5339\u914d: \"\u4fee\u8ba2\u7b2cx\u7ae0\" \u2192 `REVISE_SCENE`\n\n---\n\n## \u5de5\u4f5c\u6d41\u6267\u884c\u72b6\u6001\n\n### \u6b65\u9aa4 1: \u72b6\u6001\u611f\u77e5\n\n\u626b\u63cf workspace/ \u76ee\u5f55...\n\n**\u7ed3\u679c**: \u672a\u68c0\u6d4b\u5230\u9879\u76ee\u6587\u4ef6\n\n```\n\u274c \u5de5\u4f5c\u533a\u72b6\u6001: \u7a7a\u767d\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n\ud83d\udccb \u672a\u627e\u5230\u9879\u76ee manifest.md\n\ud83d\udcc1 \u672a\u627e\u5230\u4efb\u4f55 stage \u6587\u4ef6\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n```\n\n### \u6b65\u9aa4 2: \u524d\u7f6e\u6761\u4ef6\u68c0\u67e5\n\n**REVISE_SCENE \u524d\u7f6e\u6761\u4ef6**: \u76ee\u6807\u573a\u666f\u6587\u4ef6\u5b58\u5728\n\n**\u68c0\u67e5\u7ed3\u679c**: \u274c \u4e0d\u6ee1\u8db3\n\n- \u672a\u627e\u5230 `stage6_scene_3.md` (\u7b2c\u4e09\u7ae0\u573a\u666f\u6587\u4ef6)\n- \u672a\u627e\u5230 `manifest.md` (\u9879\u76ee\u5143\u4fe1\u606f)\n- \u672a\u627e\u5230\u4efb\u4f55\u521b\u4f5c\u4ea7\u7269\u6587\u4ef6\n\n---\n\n## \u5de5\u4f5c\u6d41\u54cd\u5e94\n\n### \u5f53\u524d\u60c5\u51b5\u8bf4\u660e\n\n\u60a8\u60f3\u8981\u4fee\u8ba2\u7b2c\u4e09\u7ae0\u7684\u6253\u620f\uff0c\u4f46\u5f53\u524d\u5de5\u4f5c\u533a\u4e2d\u6ca1\u6709\u4efb\u4f55\u9879\u76ee\u6587\u4ef6\u3002\u4fee\u8ba2\u573a\u666f\u9700\u8981\u5148\u5b8c\u6210\u4ee5\u4e0b\u524d\u7f6e\u6b65\u9aa4\uff1a\n\n1. **\u521b\u5efa\u9879\u76ee** \u2192 \u6267\u884c `CREATE_FULL` \u5de5\u4f5c\u6d41\n2. **\u5b8c\u6210\u4eba\u8bbe/\u5927\u7eb2/\u7ec6\u7eb2** \u2192 Phase 1-2\n3. **\u5199\u4f5c\u7b2c\u4e09\u7ae0** \u2192 Phase 3 \u573a\u666f\u5199\u4f5c\n\n### \u5efa\u8bae\u4e0b\u4e00\u6b65\u64cd\u4f5c\n\n**\u9009\u9879 A**: \u4ece\u5934\u5f00\u59cb\u521b\u4f5c\n```\n\u8bf7\u544a\u8bc9\u6211\uff1a\n- \u5e73\u53f0: \u756a\u8304\u5c0f\u8bf4 / \u77e5\u4e4e\u4e25\u9009 / \u5176\u4ed6\n- \u9898\u6750: \u4f8b\u5982 \u5a5a\u604b+\u590d\u4ec7\u3001\u90fd\u5e02+\u723d\u6587\u7b49\n- \u60c5\u7eea\u8d5b\u9053: \u6253\u8138\u723d\u6587 / \u751c\u5ba0 / \u60ac\u7591\u7b49\n- \u76ee\u6807\u8bfb\u8005: \u5e74\u9f84\u3001\u6027\u522b\u753b\u50cf\n- \u76ee\u6807\u5b57\u6570: 8000-15000\n- \u573a\u666f\u6570: 8-15\n```\n\n**\u9009\u9879 B**: \u5bfc\u5165\u5df2\u6709\u9879\u76ee\n```\n\u5982\u679c\u60a8\u6709\u5df2\u521b\u4f5c\u7684\u5185\u5bb9\u6587\u4ef6\uff0c\u8bf7\u63d0\u4f9b\uff1a\n- \u9879\u76ee\u6587\u4ef6\uff08stage0_params.md, stage2_characters.md \u7b49\uff09\n- \u6216\u76f4\u63a5\u63d0\u4f9b\u7b2c\u4e09\u7ae0\u5185\u5bb9\n```\n\n---\n\n## \u610f\u56fe\u8def\u7531\u9a8c\u8bc1\n\n| \u68c0\u67e5\u9879 | \u72b6\u6001 |\n|--------|------|\n| \u6b63\u786e\u8bc6\u522b\u4e3a REVISE_SCENE | \u2705 \u901a\u8fc7 |\n| \u6b63\u786e\u89e3\u6790\u76ee\u6807\u573a\u666f\u7f16\u53f7 (\u7b2c\u4e09\u7ae0) | \u2705 \u901a\u8fc7 |\n| \u6b63\u786e\u8bc6\u522b\u4fee\u6539\u610f\u56fe (\u6253\u620f\u592a\u62d6) | \u2705 \u901a\u8fc7 |\n| \u6b63\u786e\u68c0\u67e5\u524d\u7f6e\u6761\u4ef6 | \u2705 \u901a\u8fc7 |\n| \u63d0\u4f9b\u9002\u5f53\u7684\u540e\u7eed\u5f15\u5bfc | \u2705 \u901a\u8fc7 |\n\n---\n\n## \u6280\u672f\u8bf4\u660e\n\n\u672c\u54cd\u5e94\u9a8c\u8bc1\u4e86 NovelForge \u7cfb\u7edf\u7684\u610f\u56fe\u8def\u7531\u529f\u80fd\uff1a\n\n1. **\u610f\u56fe\u5339\u914d**: \u901a\u8fc7\u5173\u952e\u8bcd\"\u4fee\u8ba2\u7b2c\u4e09\u7ae0\"\u6b63\u786e\u5339\u914d\u5230 `REVISE_SCENE` \u5de5\u4f5c\u6d41\n2. **\u53c2\u6570\u63d0\u53d6**:\n   - \u76ee\u6807\u573a\u666f: \u7b2c3\u7ae0 / \u573a\u666f3\n   - \u4fee\u6539\u65b9\u5411: \u6253\u620f\u8282\u594f\u95ee\u9898\uff08\u7528\u6237\u53cd\u9988\"\u592a\u62d6\"\uff09\n3. **\u72b6\u6001\u611f\u77e5**: \u6b63\u786e\u68c0\u6d4b\u5230\u7a7a\u767d\u5de5\u4f5c\u533a\n4. **\u524d\u7f6e\u6821\u9a8c**: \u6b63\u786e\u8bc6\u522b\u524d\u7f6e\u6761\u4ef6\u4e0d\u6ee1\u8db3\n5. **\u7528\u6237\u5f15\u5bfc**: \u63d0\u4f9b\u6e05\u6670\u7684\u95ee\u9898\u8bf4\u660e\u548c\u4e0b\u4e00\u6b65\u9009\u9879"}], "grading": {"run_id": "eval-2-with_skill", "grading_results": [{"text": "\u8bc6\u522b\u4e3a REVISE_SCENE", "passed": true, "evidence": "\u660e\u786e\u8bc6\u522b\u610f\u56fe\u4e3a REVISE_SCENE\uff0c\u89e3\u6790\u76ee\u6807\u573a\u666f\u7f16\u53f7"}, {"text": "\u68c0\u6d4b\u9879\u76ee\u72b6\u6001", "passed": true, "evidence": "\u68c0\u6d4b\u5230\u5de5\u4f5c\u533a\u4e3a\u7a7a\u767d\u72b6\u6001\uff0c\u672a\u627e\u5230\u9879\u76ee\u6587\u4ef6"}, {"text": "\u5408\u7406\u54cd\u5e94", "passed": true, "evidence": "\u6b63\u786e\u63d0\u793a\u7528\u6237\u65e0\u73b0\u6709\u9879\u76ee\u53ef\u4fee\u8ba2\uff0c\u5f15\u5bfc\u521b\u5efa\u65b0\u9879\u76ee"}]}}, {"id": "eval-2-intent-routing-revise-without_skill", "prompt": "\u4fee\u8ba2\u7b2c\u4e09\u7ae0\uff0c\u8fd9\u6bb5\u6253\u620f\u5199\u5f97\u592a\u62d6\u4e86", "eval_id": 2, "outputs": [{"name": "revision_response.md", "type": "text", "content": "# \u4efb\u52a1\uff1a\u4fee\u8ba2\u7b2c\u4e09\u7ae0\u6253\u620f\n\n## \u95ee\u9898\u5206\u6790\n\n\u60a8\u6307\u51fa\u7b2c\u4e09\u7ae0\u7684\u6253\u620f\u5199\u5f97\u592a\u62d6\u6c93\uff0c\u9700\u8981\u4fee\u8ba2\u3002\n\n## \u5f53\u524d\u72b6\u6001\n\n**\u672a\u627e\u5230\u8f93\u5165\u6587\u4ef6**\uff1a\u672a\u63d0\u4f9b\u7b2c\u4e09\u7ae0\u7684\u5177\u4f53\u5185\u5bb9\u6587\u4ef6\u3002\n\n## \u4fee\u8ba2\u5efa\u8bae\uff08\u901a\u7528\u6307\u5bfc\uff09\n\n\u6253\u620f\u62d6\u6c93\u901a\u5e38\u5b58\u5728\u4ee5\u4e0b\u95ee\u9898\uff1a\n\n1. **\u52a8\u4f5c\u63cf\u5199\u8fc7\u4e8e\u5197\u957f**\n   - \u6bcf\u4e00\u62db\u6bcf\u4e00\u5f0f\u90fd\u8be6\u7ec6\u63cf\u5199\uff0c\u5bfc\u81f4\u8282\u594f\u7f13\u6162\n   - \u5efa\u8bae\uff1a\u7cbe\u7b80\u6b21\u8981\u52a8\u4f5c\uff0c\u4fdd\u7559\u5173\u952e\u8f6c\u6298\u70b9\n\n2. **\u5fc3\u7406\u6d3b\u52a8\u6253\u65ad\u8282\u594f**\n   - \u6253\u6597\u4e2d\u7a7f\u63d2\u8fc7\u591a\u5185\u5fc3\u72ec\u767d\n   - \u5efa\u8bae\uff1a\u5c06\u5fc3\u7406\u6d3b\u52a8\u653e\u5728\u6218\u6597\u95f4\u9699\u6216\u6218\u540e\n\n3. **\u5bf9\u8bdd\u8fc7\u591a**\n   - \u6253\u6597\u65f6\u89d2\u8272\u5bf9\u8bdd\u592a\u957f\n   - \u5efa\u8bae\uff1a\u6218\u6597\u5bf9\u8bdd\u5e94\u77ed\u4fc3\u6709\u529b\uff0c\u6700\u591a\u4e00\u4e24\u53e5\u8bdd\n\n4. **\u7f3a\u4e4f\u7d27\u5f20\u611f**\n   - \u5e73\u94fa\u76f4\u53d9\uff0c\u6ca1\u6709\u8d77\u4f0f\n   - \u5efa\u8bae\uff1a\u7528\u77ed\u53e5\u3001\u65ad\u53e5\u8425\u9020\u7d27\u5f20\u8282\u594f\n\n## \u4e0b\u4e00\u6b65\n\n\u8bf7\u63d0\u4f9b\u7b2c\u4e09\u7ae0\u7684\u539f\u6587\u5185\u5bb9\uff0c\u6211\u5c06\u8fdb\u884c\u5177\u4f53\u4fee\u8ba2\uff1a\n\n- \u5206\u6790\u62d6\u6c93\u7684\u5177\u4f53\u6bb5\u843d\n- \u63d0\u4f9b\u7cbe\u7b80\u540e\u7684\u4fee\u8ba2\u7248\u672c\n- \u4fdd\u6301\u6218\u6597\u7684\u8282\u594f\u611f\u548c\u5f20\u529b\n\n---\n\n*\u6b64\u8f93\u51fa\u4e3a\u65e0\u6280\u80fd\u6a21\u5f0f\u4e0b\u7684\u54cd\u5e94\uff0c\u5982\u9700\u5b8c\u6574\u7684\u5c0f\u8bf4\u4fee\u8ba2\u529f\u80fd\uff0c\u8bf7\u4f7f\u7528 novel-forge \u6280\u80fd\u3002*"}], "grading": {"run_id": "eval-2-without_skill", "grading_results": [{"text": "\u8bc6\u522b\u4e3a REVISE_SCENE", "passed": false, "evidence": "\u6ca1\u6709\u4f7f\u7528\u5de5\u4f5c\u6d41\u6982\u5ff5\uff0c\u4ec5\u4f5c\u4e3a\u901a\u7528\u5199\u4f5c\u4efb\u52a1\u5904\u7406"}, {"text": "\u68c0\u6d4b\u9879\u76ee\u72b6\u6001", "passed": true, "evidence": "\u6307\u51fa\u672a\u63d0\u4f9b\u8f93\u5165\u6587\u4ef6\uff08\u7b2c\u4e09\u7ae0\u539f\u6587\uff09"}, {"text": "\u5408\u7406\u54cd\u5e94", "passed": true, "evidence": "\u63d0\u4f9b\u4e86\u901a\u7528\u7684\u6253\u620f\u4fee\u8ba2\u5efa\u8bae"}]}}, {"id": "eval-3-sample-operations-with_skill", "prompt": "\u6536\u85cf\u8fd9\u6bb5\uff1a'\u5979\u7b11\u4e86\uff0c\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\u3002' \u5206\u6790\u4e00\u4e0b\u597d\u5728\u54ea\u91cc", "eval_id": 3, "outputs": [{"name": "sample_analysis_result.md", "type": "text", "content": "# \u6837\u672c\u6536\u85cf\u4e0e\u5206\u6790\u62a5\u544a\n\n## \u4efb\u52a1\u4fe1\u606f\n- **\u5de5\u4f5c\u6d41**: SAMPLE_ADD (\u6536\u5f55\u65b0\u6837\u672c)\n- **\u6267\u884c\u65f6\u95f4**: 2026-03-06\n- **\u72b6\u6001**: \u5b8c\u6210\n\n---\n\n## \u6536\u5f55\u7684\u7247\u6bb5\n\n**\u539f\u6587**:\n> \u5979\u7b11\u4e86\uff0c\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\u3002\n\n---\n\n## \u5206\u6790\u7ed3\u679c\n\n### \u6280\u5de7\u6807\u7b7e\n`hook` `reversal` `subtext` `character-intro` `tension`\n\n### \u60c5\u7eea\u6807\u7b7e\n`satisfying` `shock`\n\n### \u9898\u6750\u6807\u7b7e\n`romance` `revenge`\n\n---\n\n## \u8fd9\u6bb5\u597d\u5728\u54ea\uff08\u6280\u6cd5\u62c6\u89e3\uff09\n\n### 1. \u52a8\u4f5c\u5148\u884c\uff0c\u62d2\u7edd\u94fa\u57ab\n\u5f00\u95e8\u89c1\u5c71\u5c31\u662f\u52a8\u4f5c\u3002\u6ca1\u6709\u80cc\u666f\u4ecb\u7ecd\u3001\u6ca1\u6709\u5fc3\u7406\u72ec\u767d\u3001\u6ca1\u6709\u73af\u5883\u63cf\u5199\u2014\u2014\u76f4\u63a5\u8ba9\u89d2\u8272\"\u52a8\"\u8d77\u6765\u3002\u8bfb\u8005\u7b2c\u4e00\u773c\u770b\u5230\u7684\u662f\u884c\u4e3a\uff0c\u800c\u4e0d\u662f\u89e3\u91ca\u3002\u8fd9\u79cd\"\u5148\u6f14\u540e\u8bf4\"\u7684\u624b\u6cd5\u662f\u723d\u6587\u5f00\u7bc7\u7684\u6838\u5fc3\u6280\u5de7\u3002\n\n### 2. \u60c5\u7eea\u53cd\u5dee\u5236\u9020\u60ac\u5ff5\n\"\u7b11\u4e86\"\u548c\"\u79bb\u5a5a\u534f\u8bae\u4e66\"\u5f62\u6210\u5f3a\u70c8\u53cd\u5dee\u3002\u5e38\u89c4\u8ba4\u77e5\u91cc\uff0c\u79bb\u5a5a\u662f\u6c89\u91cd\u7684\u8bdd\u9898\uff0c\u5e94\u8be5\u54ed\u3001\u5e94\u8be5\u6124\u6012\u3001\u5e94\u8be5\u75db\u82e6\u2014\u2014\u4f46\u5979\u7b11\u4e86\u3002\u8fd9\u4e2a\u53cd\u5dee\u7acb\u5373\u5236\u9020\u4e86\u5de8\u5927\u7684\u60ac\u5ff5\uff1a\u5979\u4e3a\u4ec0\u4e48\u7b11\uff1f\u662f\u89e3\u8131\uff1f\u662f\u62a5\u590d\u5f97\u901e\uff1f\u662f\u91ca\u7136\uff1f\u8bfb\u8005\u4e0d\u5f97\u4e0d\u5f80\u4e0b\u770b\u3002\n\n### 3. \u52a8\u8bcd\u9009\u62e9\u7cbe\u51c6\u6709\u529b\n\u7528\"\u62cd\"\u800c\u4e0d\u662f\"\u653e\"\u3001\"\u9012\"\u3001\"\u63a8\"\u3002\"\u62cd\"\u5b57\u81ea\u5e26\u529b\u91cf\u611f\u3001\u51b3\u7edd\u611f\u3001\u4e3b\u52a8\u6027\u3002\u8fd9\u4e2a\u52a8\u4f5c\u6697\u793a\u5979\u4e0d\u662f\u88ab\u52a8\u7684\u53d7\u5bb3\u8005\uff0c\u800c\u662f\u638c\u63a7\u5c40\u9762\u7684\u4e3b\u52a8\u65b9\u3002\u4e00\u5b57\u4e4b\u5dee\uff0c\u89d2\u8272\u6c14\u573a\u5b8c\u5168\u4e0d\u540c\u3002\n\n### 4. \u6781\u81f4\u7559\u767d\uff0c\u4fe1\u606f\u6781\u7b80\n\u5168\u53e5\u4ec514\u4e2a\u5b57\uff0c\u5374\u5b8c\u6210\u4e86\uff1a\n- \u89d2\u8272\u5851\u9020\uff08\u679c\u65ad\u3001\u6709\u4e3b\u89c1\uff09\n- \u60c5\u8282\u63a8\u8fdb\uff08\u79bb\u5a5a\u8fd9\u4e2a\u91cd\u5927\u4e8b\u4ef6\uff09\n- \u60c5\u7eea\u94a9\u5b50\uff08\u4e3a\u4ec0\u4e48\u7b11\uff1f\uff09\n- \u51b2\u7a81\u9884\u8bbe\uff08\u79bb\u5a5a\u610f\u5473\u7740\u4ec0\u4e48\uff1f\uff09\n\n\u6ca1\u6709\u4efb\u4f55\u5197\u4f59\u4fe1\u606f\uff0c\u6bcf\u4e2a\u5b57\u90fd\u5728\u5e72\u6d3b\u3002\u8fd9\u5c31\u662f\"\u9ad8\u4fe1\u606f\u5bc6\u5ea6\"\u7684\u5178\u8303\u3002\n\n---\n\n## \u53ef\u8fc1\u79fb\u7684\u5199\u4f5c\u6280\u6cd5\n\n| \u6280\u6cd5 | \u8bf4\u660e | \u9002\u7528\u573a\u666f |\n|------|------|----------|\n| \u52a8\u4f5c\u5f00\u7bc7\u6cd5 | \u7528\u4e00\u4e2a\u5f3a\u6709\u529b\u7684\u52a8\u4f5c\u4ee3\u66ff\u4efb\u4f55\u89e3\u91ca\u6027\u6587\u5b57 | \u5f00\u7bc7\u7b2c\u4e00\u53e5\u3001\u573a\u666f\u8f6c\u6362\u65f6\u3001\u9700\u8981\u5feb\u901f\u5efa\u7acb\u89d2\u8272\u5370\u8c61\u65f6 |\n| \u53cd\u5dee\u7ec4\u5408\u6cd5 | \u5c06\u4e24\u79cd\u770b\u4f3c\u77db\u76fe\u7684\u60c5\u7eea/\u884c\u4e3a\u7ec4\u5408\u5728\u4e00\u8d77 | \u5236\u9020\u60ac\u5ff5\u3001\u5efa\u7acb\u89d2\u8272\u590d\u6742\u6027 |\n| \u52a8\u8bcd\u529b\u5ea6\u5347\u7ea7 | \u628a\u5f31\u52a8\u8bcd\u6362\u6210\u5f3a\u52a8\u8bcd | \u9700\u8981\u5f3a\u8c03\u89d2\u8272\u6c14\u573a\u3001\u60c5\u7eea\u5f3a\u5ea6\u65f6 |\n| \u6781\u7b80\u4fe1\u606f\u5757 | \u63a7\u5236\u5728\u4e00\u53e5\u8bdd\u5185\uff0c\u8ba9\u8bfb\u8005\u4e3b\u52a8\u60f3\u77e5\u9053\"\u7136\u540e\u5462\uff1f\" | \u5f00\u7bc7\u94a9\u5b50\u3001\u573a\u666f\u7ed3\u5c3e\u7559\u767d\u3001\u5173\u952e\u8f6c\u6298\u70b9 |\n\n---\n\n## \u91cf\u5316\u7279\u5f81\n- \u53e5\u5747\u5b57\u6570: 14\u5b57\n- \u5bf9\u8bdd\u5360\u6bd4: 0%\n- \u6700\u957f\u6bb5\u843d: 14\u5b57\n- \u611f\u5b98\u63cf\u5199\u5bc6\u5ea6: 14.3\u5904/\u767e\u5b57\n- \u4fe1\u606f\u5bc6\u5ea6: \u6781\u9ad8\uff0814\u5b57\u627f\u8f7d4\u91cd\u4fe1\u606f\uff09\n\n---\n\n## \u7075\u611f\u884d\u751f\n\n\u8fd9\u53e5\u53ef\u6269\u5c55\u4e3a\u591a\u79cd\u5f00\u7bc7\u98ce\u683c\uff1a\n\n**\u6253\u8138\u723d\u6587\u7248**:\n> \u5979\u7b11\u4e86\uff0c\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\u3002\"\u7b7e\u4e86\u5427\uff0c\u522b\u8ba9\u6211\u8bf4\u7b2c\u4e8c\u904d\u3002\"\n\n**\u8650\u5fc3\u53cd\u8f6c\u7248**:\n> \u5979\u7b11\u4e86\uff0c\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\u3002\u7b11\u7740\u7b11\u7740\uff0c\u773c\u6cea\u5c31\u4e0b\u6765\u4e86\u3002\n\n**\u6697\u9ed1\u590d\u4ec7\u7248**:\n> \u5979\u7b11\u4e86\uff0c\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\u3002\u4e09\u5e74\u7684\u9690\u5fcd\uff0c\u5c31\u7b49\u4eca\u5929\u3002\n\n---\n\n## \u6536\u5f55\u7ed3\u679c\n\n**\u6587\u4ef6\u4f4d\u7f6e**: `/home/long/git/my_claude_code_skills/.claude/skills/novel-forge/samples/sample_003.md`\n\n**\u7d22\u5f15\u5df2\u66f4\u65b0**: `samples/INDEX.md`\n\n---\n\n## \u5efa\u8bae\u4e0b\u4e00\u6b65\n\n- \u4f7f\u7528 `SAMPLE_LIST` \u67e5\u770b\u6837\u672c\u5e93\n- \u4f7f\u7528 `SAMPLE_APPLY` \u53c2\u8003\u6b64\u6837\u672c\u8fdb\u884c\u5199\u4f5c\n- \u7ee7\u7eed\u6536\u85cf\u66f4\u591a\u4f18\u79c0\u7247\u6bb5\uff0c\u79ef\u7d2f\u5ba1\u7f8e\u753b\u50cf"}], "grading": {"run_id": "eval-3-with_skill", "grading_results": [{"text": "\u8bc6\u522b\u4e3a\u6837\u672c\u64cd\u4f5c", "passed": true, "evidence": "\u660e\u786e\u8bc6\u522b\u5de5\u4f5c\u6d41\u4e3a SAMPLE_ADD"}, {"text": "\u6280\u6cd5\u5206\u6790", "passed": true, "evidence": "\u63d0\u4f9b\u4e86\u8be6\u7ec6\u7684\u6280\u6cd5\u62c6\u89e3\uff1a\u52a8\u4f5c\u5148\u884c\u3001\u60c5\u7eea\u53cd\u5dee\u3001\u52a8\u8bcd\u9009\u62e9\u3001\u6781\u81f4\u7559\u767d"}, {"text": "\u6807\u7b7e\u8bc6\u522b", "passed": true, "evidence": "\u8bc6\u522b\u4e86 hook, reversal, subtext, character-intro, tension \u7b49\u6280\u5de7\u6807\u7b7e"}]}}, {"id": "eval-3-sample-operations-without_skill", "prompt": "\u6536\u85cf\u8fd9\u6bb5\uff1a'\u5979\u7b11\u4e86\uff0c\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\u3002' \u5206\u6790\u4e00\u4e0b\u597d\u5728\u54ea\u91cc", "eval_id": 3, "outputs": [{"name": "collection_analysis.md", "type": "text", "content": "# \u6587\u5b66\u7247\u6bb5\u5206\u6790\uff1a\u6536\u85cf\u8bed\u53e5\n\n## \u539f\u53e5\n**\"\u5979\u7b11\u4e86\uff0c\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\u3002\"**\n\n---\n\n## \u597d\u5728\u54ea\u91cc\uff1a\u6df1\u5ea6\u89e3\u6790\n\n### \u4e00\u3001\u52a8\u4f5c\u4e0e\u60c5\u7eea\u7684\u53cd\u5dee\u5f20\u529b\n\n\u8fd9\u53e5\u8bdd\u7684\u7cbe\u5999\u4e4b\u5904\u9996\u5148\u5728\u4e8e**\u60c5\u7eea\u4e0e\u52a8\u4f5c\u7684\u5f3a\u70c8\u53cd\u5dee**\uff1a\n\n- **\"\u5979\u7b11\u4e86\"** \u2014 \u8868\u9762\u662f\u8f7b\u677e\u3001\u91ca\u7136\uff0c\u751a\u81f3\u53ef\u80fd\u5e26\u7740\u67d0\u79cd\u6f47\u6d12\n- **\"\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\"** \u2014 \u8fd9\u4e2a\"\u62cd\"\u5b57\u662f\u6574\u4e2a\u53e5\u5b50\u7684\u7075\u9b42\uff0c\u4f20\u9012\u51fa\u4e00\u79cd\u51b3\u7edd\u3001\u679c\u65ad\u3001\u4e0d\u5bb9\u7f6e\u7591\u7684\u529b\u91cf\n\n\u5fae\u7b11\u4e0e\u91cd\u62cd\u684c\u5b50\u5f62\u6210\u9c9c\u660e\u5bf9\u6bd4\uff0c\u8fd9\u79cd\u53cd\u5dee\u8ba9\u4eba\u7269\u5f62\u8c61\u77ac\u95f4\u7acb\u4f53\u8d77\u6765\u3002\u5979\u4e0d\u662f\u5728\u60b2\u4f24\u4e2d\u7b7e\u5b57\uff0c\u4e0d\u662f\u5728\u6124\u6012\u4e2d\u6454\u7eb8\uff0c\u800c\u662f\u5728\u4e00\u79cd**\u638c\u63a7\u5168\u5c40\u7684\u4ece\u5bb9**\u4e2d\u5b8c\u6210\u8fd9\u4e2a\u52a8\u4f5c\u3002\n\n### \u4e8c\u3001\"\u62cd\"\u5b57\u7684\u620f\u5267\u6027\n\n\"\u62cd\"\u8fd9\u4e2a\u52a8\u8bcd\u9009\u62e9\u6781\u5176\u7cbe\u51c6\uff1a\n\n1. **\u58f0\u97f3\u611f**\uff1a\u8bfb\u8005\u51e0\u4e4e\u80fd\u542c\u5230\u7eb8\u5f20\u649e\u51fb\u684c\u9762\u7684\u6e05\u8106\u58f0\u54cd\n2. **\u529b\u91cf\u611f**\uff1a\u8fd9\u4e0d\u662f\"\u653e\"\uff0c\u4e0d\u662f\"\u9012\"\uff0c\u800c\u662f\"\u62cd\"\u2014\u2014\u5e26\u7740\u6001\u5ea6\uff0c\u5e26\u7740\u6c14\u573a\n3. **\u4eea\u5f0f\u611f**\uff1a\u4eff\u4f5b\u662f\u4e00\u4e2a\u4eea\u5f0f\u7684\u5b8c\u6210\uff0c\u4e00\u4e2a\u7ae0\u8282\u7684\u7ec8\u7ed3\n\n\u8fd9\u4e2a\"\u62cd\"\u5b57\u628a\u6574\u53e5\u8bdd\u4ece\u666e\u901a\u7684\u52a8\u4f5c\u63cf\u5199\u63d0\u5347\u5230\u4e86**\u620f\u5267\u6027\u7684\u573a\u666f\u5448\u73b0**\u3002\n\n### \u4e09\u3001\u8a00\u5916\u4e4b\u610f\u7684\u9ad8\u7ea7\u7559\u767d\n\n\u8fd9\u53e5\u8bdd\u6ca1\u6709\u76f4\u63a5\u63cf\u5199\u5979\u7684\u5185\u5fc3\uff0c\u4f46\u901a\u8fc7\u52a8\u4f5c\u6697\u793a\u4e86\u4e30\u5bcc\u7684\u6f5c\u53f0\u8bcd\uff1a\n\n- \u53ef\u80fd\u662f**\u89e3\u8131\u540e\u7684\u7545\u5feb**\uff1a\u7ec8\u4e8e\u7ed3\u675f\u4e86\u4e00\u6bb5\u4e0d\u5feb\u4e50\u7684\u5a5a\u59fb\n- \u53ef\u80fd\u662f**\u80dc\u5229\u8005\u7684\u59ff\u6001**\uff1a\u5728\u8fd9\u573a\u535a\u5f08\u4e2d\u5360\u636e\u4e86\u4e3b\u52a8\n- \u53ef\u80fd\u662f**\u5bf9\u8fc7\u53bb\u7684\u5f7b\u5e95\u544a\u522b**\uff1a\u4e0d\u518d\u6709\u4efb\u4f55\u7559\u604b\u548c\u72b9\u8c6b\n\n\u8fd9\u79cd\"\u4e0d\u5199\u800c\u5199\"\u7684\u624b\u6cd5\uff0c\u8ba9\u8bfb\u8005\u81ea\u5df1\u53bb\u586b\u8865\u4eba\u7269\u7684\u5fc3\u7406\u7a7a\u95f4\uff0c\u53c2\u4e0e\u611f\u66f4\u5f3a\u3002\n\n### \u56db\u3001\u8282\u594f\u4e0e\u753b\u9762\u7684\u7535\u5f71\u611f\n\n- **\"\u5979\u7b11\u4e86\"** \u2014 \u4e09\u4e2a\u5b57\uff0c\u8f7b\u5feb\n- **\"\uff0c\"** \u2014 \u4e00\u4e2a\u9017\u53f7\uff0c\u547c\u5438\u7684\u505c\u987f\n- **\"\u628a\u79bb\u5a5a\u534f\u8bae\u4e66\u5f80\u684c\u4e0a\u4e00\u62cd\"** \u2014 \u5341\u4e00\u4e2a\u5b57\uff0c\u7531\u6162\u5230\u5feb\uff0c\u6700\u540e\u843d\u5728\"\u62cd\"\u8fd9\u4e2a\u6709\u529b\u7684\u5b57\u773c\u4e0a\n\n\u6574\u53e5\u8bdd\u7684\u8282\u594f\u5c31\u50cf\u4e00\u4e2a\u6162\u955c\u5934\uff1a\u5fae\u7b11\u5b9a\u683c \u2192 \u534f\u8bae\u4e66\u6ed1\u8fc7\u7a7a\u6c14 \u2192 \u556a\u7684\u4e00\u58f0\u843d\u5728\u684c\u4e0a\u3002\u8fd9\u79cd\u753b\u9762\u611f\u8ba9\u8bfb\u8005\u5982\u540c\u89c2\u5f71\u3002\n\n### \u4e94\u3001\u4eba\u7269\u5851\u9020\u7684\u7ecf\u6d4e\u6027\n\n\u4ec5\u4ec5\u4e00\u4e2a\u52a8\u4f5c\uff0c\u5c31\u5851\u9020\u51fa\u4e00\u4e2a\uff1a\n- **\u6709\u4e3b\u89c1**\u7684\u5973\u6027\u5f62\u8c61\n- **\u6709\u529b\u91cf**\u7684\u6027\u683c\u7279\u5f81\n- **\u6709\u6545\u4e8b**\u7684\u4eba\u751f\u9636\u6bb5\n\n\u8fd9\u662f\u4e00\u4e2a\"\u4f1a\u6f14\u620f\"\u7684\u53e5\u5b50\uff0c\u7528\u6700\u5c11\u7684\u7b14\u58a8\u5b8c\u6210\u4e86\u6700\u5927\u7684\u4eba\u7269\u5851\u9020\u3002\n\n---\n\n## \u603b\u7ed3\n\n\u8fd9\u53e5\u8bdd\u597d\u5728\uff1a**\u7528\u4e00\u4e2a\u53cd\u5dee\u6027\u7684\u52a8\u4f5c\u7ec4\u5408\uff0c\u5728\u6781\u77ed\u7684\u7bc7\u5e45\u5185\u5b8c\u6210\u4e86\u60c5\u7eea\u6e32\u67d3\u3001\u4eba\u7269\u5851\u9020\u548c\u573a\u666f\u6784\u5efa\u3002**\n\n\u5b83\u544a\u8bc9\u6211\u4eec\uff1a\u597d\u7684\u5c0f\u8bf4\u4e0d\u4e00\u5b9a\u8981\u7528\u5f88\u591a\u5f62\u5bb9\u8bcd\uff0c\u4e0d\u4e00\u5b9a\u8981\u94fa\u9648\u5927\u6bb5\u5fc3\u7406\u63cf\u5199\u3002\u4e00\u4e2a\u7cbe\u51c6\u7684\u52a8\u4f5c\uff0c\u4e00\u4e2a\u6709\u529b\u7684\u52a8\u8bcd\uff0c\u914d\u5408\u6070\u5230\u597d\u5904\u7684\u8282\u594f\uff0c\u5c31\u80fd\u8ba9\u6587\u5b57\u5145\u6ee1\u5f20\u529b\uff0c\u8ba9\u753b\u9762\u8dc3\u7136\u7eb8\u4e0a\u3002\n\n\u8fd9\u5c31\u662f\"\u5c11\u5373\u662f\u591a\"\u7684\u6587\u5b66\u5178\u8303\u3002"}], "grading": {"run_id": "eval-3-without_skill", "grading_results": [{"text": "\u8bc6\u522b\u4e3a\u6837\u672c\u64cd\u4f5c", "passed": false, "evidence": "\u6ca1\u6709\u6837\u672c\u5e93\u6982\u5ff5\uff0c\u4ec5\u4f5c\u4e3a\u6587\u672c\u5206\u6790\u4efb\u52a1"}, {"text": "\u6280\u6cd5\u5206\u6790", "passed": true, "evidence": "\u63d0\u4f9b\u4e86\u52a8\u4f5c\u4e0e\u60c5\u7eea\u53cd\u5dee\u3001'\u62cd'\u5b57\u7684\u620f\u5267\u6027\u7b49\u5206\u6790"}, {"text": "\u6807\u7b7e\u8bc6\u522b", "passed": false, "evidence": "\u6ca1\u6709\u4f7f\u7528\u6807\u7b7e\u4f53\u7cfb\uff0c\u4ec5\u505a\u4e86\u6587\u5b57\u5206\u6790"}]}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"skill_name": "novel-forge", "iteration": 1, "timestamp": "2026-03-06T01:40:00Z", "summary": {"with_skill": {"total_tests": 3, "passed_assertions": 9, "total_assertions": 9, "pass_rate": 1.0, "avg_duration_seconds": 108.6, "total_duration_seconds": 325.9}, "without_skill": {"total_tests": 3, "passed_assertions": 6, "total_assertions": 9, "pass_rate": 0.67, "avg_duration_seconds": 46.3, "total_duration_seconds": 138.9}, "delta": {"pass_rate_improvement": 0.33, "duration_overhead_seconds": 62.3}}, "details": [{"eval_id": 1, "eval_name": "intent-routing-create", "with_skill": {"passed": 3, "total": 3, "duration_seconds": 88.5}, "without_skill": {"passed": 2, "total": 3, "duration_seconds": 48.3}}, {"eval_id": 2, "eval_name": "intent-routing-revise", "with_skill": {"passed": 3, "total": 3, "duration_seconds": 92.3}, "without_skill": {"passed": 2, "total": 3, "duration_seconds": 51.0}}, {"eval_id": 3, "eval_name": "sample-operations", "with_skill": {"passed": 3, "total": 3, "duration_seconds": 145.1}, "without_skill": {"passed": 1, "total": 3, "duration_seconds": 39.6}}], "analyst_observations": ["\u6280\u80fd\u663e\u8457\u63d0\u5347\u4e86\u610f\u56fe\u8bc6\u522b\u51c6\u786e\u6027\uff0c\u6240\u6709\u5de5\u4f5c\u6d41ID\u90fd\u80fd\u6b63\u786e\u8bc6\u522b", "\u6280\u80fd\u63d0\u4f9b\u4e86\u5b8c\u6574\u7684\u5de5\u4f5c\u6d41\u6846\u67b6\uff08CREATE_FULL\u3001REVISE_SCENE\u3001SAMPLE_ADD\uff09\uff0c\u800c\u65e0\u6280\u80fd\u57fa\u7ebf\u53ea\u80fd\u505a\u901a\u7528\u5904\u7406", "\u6837\u672c\u5e93\u64cd\u4f5c\u5dee\u8ddd\u6700\u5927\uff1a\u6709\u6280\u80fd\u7248\u672c\u80fd\u8bc6\u522b\u6807\u7b7e\u4f53\u7cfb\u5e76\u66f4\u65b0\u7d22\u5f15\uff0c\u65e0\u6280\u80fd\u7248\u672c\u6ca1\u6709\u6837\u672c\u5e93\u6982\u5ff5", "\u6709\u6280\u80fd\u7248\u672c\u8017\u65f6\u66f4\u957f\uff08\u5e73\u5747108.6\u79d2 vs 46.3\u79d2\uff09\uff0c\u4f46\u63d0\u4f9b\u4e86\u66f4\u7ed3\u6784\u5316\u3001\u53ef\u6267\u884c\u7684\u8f93\u51fa"]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

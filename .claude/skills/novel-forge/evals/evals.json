@@ -1,0 +1,29 @@
+{
+  "skill_name": "novel-forge",
+  "evals": [
+    {
+      "id": 1,
+      "eval_name": "intent-routing-create",
+      "prompt": "帮我写一个番茄小说的短篇，题材是婚恋复仇，情绪要打脸爽文",
+      "expected_output": "正确识别为 CREATE_FULL 意图，开始参数收集流程",
+      "assertions": [],
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "intent-routing-revise",
+      "prompt": "修订第三章，这段打戏写得太拖了",
+      "expected_output": "正确识别为 REVISE_SCENE 意图，准备修订指定场景",
+      "assertions": [],
+      "files": []
+    },
+    {
+      "id": 3,
+      "eval_name": "sample-operations",
+      "prompt": "收藏这段：'她笑了，把离婚协议书往桌上一拍。' 分析一下好在哪里",
+      "expected_output": "识别为 SAMPLE_ADD 或 SAMPLE_ANALYZE，执行技法分析",
+      "assertions": [],
+      "files": []
+    }
+  ]
+}

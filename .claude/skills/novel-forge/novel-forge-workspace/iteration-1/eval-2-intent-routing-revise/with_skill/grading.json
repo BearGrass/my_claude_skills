@@ -1,0 +1,20 @@
+{
+  "run_id": "eval-2-with_skill",
+  "grading_results": [
+    {
+      "text": "识别为 REVISE_SCENE",
+      "passed": true,
+      "evidence": "明确识别意图为 REVISE_SCENE，解析目标场景编号"
+    },
+    {
+      "text": "检测项目状态",
+      "passed": true,
+      "evidence": "检测到工作区为空白状态，未找到项目文件"
+    },
+    {
+      "text": "合理响应",
+      "passed": true,
+      "evidence": "正确提示用户无现有项目可修订，引导创建新项目"
+    }
+  ]
+}

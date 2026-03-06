@@ -1,0 +1,10 @@
+{
+  "eval_id": 1,
+  "eval_name": "intent-routing-create",
+  "prompt": "帮我写一个番茄小说的短篇，题材是婚恋复仇，情绪要打脸爽文",
+  "assertions": [
+    {"name": "识别为 CREATE_FULL", "check": "响应中应识别出创建小说意图"},
+    {"name": "参数收集", "check": "应开始收集平台、题材、情绪等参数"},
+    {"name": "提及番茄小说规范", "check": "应提及番茄小说的平台特性或规范"}
+  ]
+}

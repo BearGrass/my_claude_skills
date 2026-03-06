@@ -1,0 +1,10 @@
+{
+  "eval_id": 3,
+  "eval_name": "sample-operations",
+  "prompt": "收藏这段：'她笑了，把离婚协议书往桌上一拍。' 分析一下好在哪里",
+  "assertions": [
+    {"name": "识别为样本操作", "check": "响应中应识别出样本库相关操作"},
+    {"name": "技法分析", "check": "应分析这段文字的写作技法"},
+    {"name": "标签识别", "check": "应识别相关技巧标签如 hook、dialogue 等"}
+  ]
+}

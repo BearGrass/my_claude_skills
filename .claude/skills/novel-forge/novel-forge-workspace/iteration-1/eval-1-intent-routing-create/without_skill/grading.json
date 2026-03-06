@@ -1,0 +1,20 @@
+{
+  "run_id": "eval-1-without_skill",
+  "grading_results": [
+    {
+      "text": "识别为 CREATE_FULL",
+      "passed": false,
+      "evidence": "没有使用工作流概念，仅做了通用的意图分析"
+    },
+    {
+      "text": "参数收集",
+      "passed": true,
+      "evidence": "收集了平台、题材、情绪等参数"
+    },
+    {
+      "text": "提及番茄小说规范",
+      "passed": true,
+      "evidence": "提到了番茄小说的字数、章节、标题等规范"
+    }
+  ]
+}

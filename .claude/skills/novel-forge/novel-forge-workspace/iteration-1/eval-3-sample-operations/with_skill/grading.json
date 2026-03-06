@@ -1,0 +1,20 @@
+{
+  "run_id": "eval-3-with_skill",
+  "grading_results": [
+    {
+      "text": "识别为样本操作",
+      "passed": true,
+      "evidence": "明确识别工作流为 SAMPLE_ADD"
+    },
+    {
+      "text": "技法分析",
+      "passed": true,
+      "evidence": "提供了详细的技法拆解：动作先行、情绪反差、动词选择、极致留白"
+    },
+    {
+      "text": "标签识别",
+      "passed": true,
+      "evidence": "识别了 hook, reversal, subtext, character-intro, tension 等技巧标签"
+    }
+  ]
+}

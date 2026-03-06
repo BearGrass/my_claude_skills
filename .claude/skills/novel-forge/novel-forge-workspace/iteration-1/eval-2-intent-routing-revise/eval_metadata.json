@@ -1,0 +1,10 @@
+{
+  "eval_id": 2,
+  "eval_name": "intent-routing-revise",
+  "prompt": "修订第三章，这段打戏写得太拖了",
+  "assertions": [
+    {"name": "识别为 REVISE_SCENE", "check": "响应中应识别出修订场景意图"},
+    {"name": "检测项目状态", "check": "应检测是否有现有项目"},
+    {"name": "合理响应", "check": "如无项目应提示用户，如有项目应准备修订流程"}
+  ]
+}

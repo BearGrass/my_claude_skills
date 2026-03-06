@@ -1,0 +1,20 @@
+{
+  "run_id": "eval-1-with_skill",
+  "grading_results": [
+    {
+      "text": "识别为 CREATE_FULL",
+      "passed": true,
+      "evidence": "输出文件明确标注 '工作流ID: CREATE_FULL'"
+    },
+    {
+      "text": "参数收集",
+      "passed": true,
+      "evidence": "提取了平台、题材、情绪等参数，并标注了需确认参数"
+    },
+    {
+      "text": "提及番茄小说规范",
+      "passed": true,
+      "evidence": "详细列出了番茄小说的句均字数、对话占比、开篇钩子等规范"
+    }
+  ]
+}
