@@ -42,9 +42,23 @@ disable-model-invocation: true
 2. Find "Unplanned" items (or filter by $ARGUMENTS if specified)
 3. For each item, analyze: files to modify, new files needed, external deps, architecture conflicts, complexity (S/M/L), suggested order
 4. **Present analysis. Wait for confirmation.**
-5. After confirmation: move items to "Planned" in BACKLOG.md, create file-level tasks in TODO.md, update ARCHITECTURE.md/ROADMAP.md if affected
+5. After confirmation: move items to "Planned" in BACKLOG.md, write tasks to TODO.md, update ARCHITECTURE.md/ROADMAP.md if affected
 
-Rules: No code in this phase. Ask if ambiguous. State conflicts clearly.
+## TODO.md Task Format
+
+Each requirement becomes one task entry with numbered steps:
+
+```
+- [ ] [F-001] Title (source: BACKLOG.md)
+  - [ ] [F-001/1] Create src/foo.go — implement X
+  - [ ] [F-001/2] Update src/bar.go — add Y to Z
+  - [ ] [F-001/3] Write tests for foo.go
+```
+
+Rules:
+- Every step must reference a specific file
+- Steps ordered by dependency (files depended upon come first)
+- No code in this phase. Ask if ambiguous. State conflicts clearly.
 ```
 
 ## /dev
@@ -52,24 +66,41 @@ Rules: No code in this phase. Ask if ambiguous. State conflicts clearly.
 ```markdown
 ---
 name: dev
-description: Develop the highest priority task from TODO.md with code, tests, and doc updates.
-argument-hint: [task-id or blank for highest priority]
+description: Develop tasks from TODO.md with code, tests, and doc updates. Accepts task-id (e.g. F-001) to work the whole task, or task-id/step (e.g. F-001/2) to work a single step.
+argument-hint: [task-id | task-id/step | blank for highest priority]
 disable-model-invocation: true
 ---
 
 # Development Workflow
 
-1. Read: CLAUDE.md, {DOC_DIR}/TODO.md, {DOC_DIR}/ARCHITECTURE.md, {DOC_DIR}/CONVENTIONS.md
-2. Find highest priority "Not started" task (or use $ARGUMENTS)
-3. **Present plan: files to modify, approach. Wait for confirmation.**
+## Argument Parsing
 
-Per-file loop:
-1. Write code + unit tests
-2. Run `{TEST_CMD} {RACE_FLAG}` on relevant package — fix until pass
-3. Update docs: new package → CLAUDE.md, architecture change → ARCHITECTURE.md, user feature → README.md, new issue → TODO.md
-4. **Report changes. Wait for confirmation.**
+Parse $ARGUMENTS:
+- blank → find highest priority task with any "Not started" step
+- `F-001` → work task F-001 from its first "Not started" step through all steps
+- `F-001/2` → work only step 2 of task F-001
 
-Completion: full test suite pass → lint `{LINT_CMD}` no warnings → mark done in TODO.md → move to "Completed" in BACKLOG.md
+Read: CLAUDE.md, {DOC_DIR}/TODO.md, {DOC_DIR}/ARCHITECTURE.md, {DOC_DIR}/CONVENTIONS.md
+
+**Present target: task title, which step(s) will be worked, files involved. Wait for confirmation.**
+
+## Per-Step Loop
+
+For each step in scope:
+1. Mark step `[ ]` → `[~]` (in-progress) in TODO.md
+2. Write code changes for that file + unit tests
+3. Run `{TEST_CMD} {RACE_FLAG}` on relevant package — fix until pass
+4. Update docs if needed: new package → CLAUDE.md, arch change → ARCHITECTURE.md, user feature → README.md, new issue → TODO.md
+5. Mark step `[~]` → `[x]` in TODO.md
+6. **Report step done. Wait for confirmation before next step.**
+
+## Task Completion
+
+When all steps of a task are `[x]`:
+1. Run full test suite: `{TEST_CMD} {RACE_FLAG}` — must pass
+2. Run lint: `{LINT_CMD}` — no warnings
+3. Mark task `[ ]` → `[x]` in TODO.md
+4. Move requirement to "Completed" in BACKLOG.md
 ```
 
 ## /dev-resume
@@ -77,16 +108,16 @@ Completion: full test suite pass → lint `{LINT_CMD}` no warnings → mark done
 ```markdown
 ---
 name: dev-resume
-description: Resume an interrupted development session by reading TODO.md for in-progress tasks.
+description: Resume an interrupted development session by finding the first in-progress or incomplete step in TODO.md.
 disable-model-invocation: true
 ---
 
 # Resume Development
 
 1. Read: CLAUDE.md, {DOC_DIR}/TODO.md, {DOC_DIR}/BACKLOG.md
-2. Find "In Progress" tasks in TODO.md
-3. Report: which task, files done, what remains
-4. **Wait for confirmation, then continue per /dev per-file loop rules**
+2. Find the first task containing a `[~]` (in-progress) or the first task with mixed `[x]`/`[ ]` steps
+3. Report: task title, steps completed `[x]`, current step `[~]` or next `[ ]`, steps remaining
+4. **Wait for confirmation, then continue per /dev per-step loop rules starting from the identified step**
 ```
 
 ## /test

@@ -34,18 +34,30 @@ Sections: Version History (table: Version | Date | Highlights — from git tags)
 (none)
 
 ## Backlog
+### Feature
+<!-- - [ ] [F-001] Title (source: BACKLOG.md)
+  - [ ] [F-001/1] Create src/foo.go — implement X
+  - [ ] [F-001/2] Update src/bar.go — add Y
+  - [ ] [F-001/3] Write tests for foo.go -->
+
 ### BUG
-<!-- - [ ] [B-001] description (file:line) -->
+<!-- - [ ] [B-001] description (file:line)
+  - [ ] [B-001/1] Fix src/foo.go line 42
+  - [ ] [B-001/2] Add regression test -->
+
 ### Optimization
 <!-- - [ ] [O-001] description -->
+
 ### Technical Debt
 <!-- - [ ] [D-001] description (source) -->
 
 ## Completed
-<!-- - [x] [B-001] description (completed YYYY-MM-DD) -->
+<!-- - [x] [F-001] Title (completed YYYY-MM-DD) -->
 ```
 
 Task ID prefixes: `B-xxx` Bug, `O-xxx` Optimization, `D-xxx` Tech Debt, `F-xxx` Feature.
+Step IDs: `F-001/1`, `F-001/2`, ... — addressable by `/dev F-001/2`.
+Step states: `[ ]` not started, `[~]` in-progress, `[x]` done.
 
 ## TEST_PLAN.md — Coverage
 
